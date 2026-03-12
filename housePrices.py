@@ -9,3 +9,9 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
+df = pd.read_csv('train.csv')
+df.head()
+
+df.info()
+
+df.describe()
