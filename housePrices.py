@@ -41,3 +41,17 @@ plt.show()
 
 corr['SalePrice'].sort_values(ascending=False).head(10)
 
+"""## 4. Análisis de Agrupamiento (Clustering)"""
+
+cluster_data = df[['SalePrice','GrLivArea','OverallQual']].dropna()
+
+scaler = StandardScaler()
+scaled = scaler.fit_transform(cluster_data)
+
+kmeans = KMeans(n_clusters=3, random_state=42)
+cluster_data['cluster'] = kmeans.fit_predict(scaled)
+
+sns.scatterplot(x=cluster_data['GrLivArea'], y=cluster_data['SalePrice'], hue=cluster_data['cluster'])
+plt.title('Clustering de viviendas')
+plt.show()
+
