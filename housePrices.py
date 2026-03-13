@@ -55,3 +55,14 @@ sns.scatterplot(x=cluster_data['GrLivArea'], y=cluster_data['SalePrice'], hue=cl
 plt.title('Clustering de viviendas')
 plt.show()
 
+"""## 5. División de datos en entrenamiento y prueba"""
+
+features = ['GrLivArea','OverallQual','GarageCars','TotalBsmtSF']
+
+X = df[features]
+y = df['SalePrice']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
