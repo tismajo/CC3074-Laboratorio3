@@ -87,3 +87,15 @@ plt.show()
 
 print('R2:', r2_score(y_test_u, pred_uni))
 print('RMSE:', np.sqrt(mean_squared_error(y_test_u, pred_uni)))
+
+"""## 7. Modelo de Regresión Lineal Múltiple"""
+
+model_multi = LinearRegression()
+model_multi.fit(X_train, y_train)
+
+pred_multi = model_multi.predict(X_test)
+
+print('R2:', r2_score(y_test, pred_multi))
+print('RMSE:', np.sqrt(mean_squared_error(y_test, pred_multi)))
+
+
