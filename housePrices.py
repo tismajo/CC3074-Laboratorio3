@@ -66,3 +66,24 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
+"""## 6. Modelo de Regresión Lineal Simple"""
+
+X_uni = df[['GrLivArea']]
+y = df['SalePrice']
+
+X_train_u, X_test_u, y_train_u, y_test_u = train_test_split(
+    X_uni, y, test_size=0.2, random_state=42
+)
+
+model_uni = LinearRegression()
+model_uni.fit(X_train_u, y_train_u)
+
+pred_uni = model_uni.predict(X_test_u)
+
+plt.scatter(X_test_u, y_test_u)
+plt.plot(X_test_u, pred_uni)
+plt.title('Regresión Lineal Simple')
+plt.show()
+
+print('R2:', r2_score(y_test_u, pred_uni))
+print('RMSE:', np.sqrt(mean_squared_error(y_test_u, pred_uni)))
