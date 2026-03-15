@@ -106,3 +106,49 @@ sns.scatterplot(x=pred_multi, y=residuals)
 plt.axhline(0)
 plt.title('Análisis de residuos')
 plt.show()
+
+"""## 9. Conclusión
+
+El análisis exploratorio permitió identificar variables importantes que influyen en el precio de las viviendas. Las variables con mayor correlación con el precio incluyen calidad general de la vivienda, área habitable y número de espacios de garaje.
+
+Se construyeron dos modelos:
+- Regresión lineal simple
+- Regresión lineal múltiple
+
+El modelo múltiple mostró mejor desempeño predictivo, ya que incorpora varias variables relevantes que explican mejor la variabilidad del precio de las casas.
+
+Por lo tanto, el modelo de **regresión lineal múltiple** se considera el más adecuado para la predicción del precio de las viviendas.
+
+## Preprocesamiento de datos
+
+Según el análisis exploratorio, varios valores faltantes representan ausencia de una característica (por ejemplo, casas sin piscina o sin chimenea).  
+Por ello:
+
+- Variables categóricas → se reemplazan con `"None"`
+- Variables numéricas → se rellenan con la **mediana**
+
+Esto evita perder información al eliminar filas.
+"""
+
+def preprocess_data(df):
+
+    categorical = df.select_dtypes(include=["object"]).columns
+    df[categorical] = df[categorical].fillna("None")
+
+    numeric = df.select_dtypes(include=[np.number]).columns
+    for col in numeric:
+        df[col] = df[col].fillna(df[col].median())
+
+    return df
+
+train = preprocess_data(df)
+
+"""## Eliminación de outliers
+
+Durante el análisis exploratorio se detectaron casas extremadamente grandes (`GrLivArea > 4000`) con precios relativamente bajos.
+
+Estas observaciones pueden afectar negativamente modelos lineales, por lo que se eliminan.
+"""
+
+train = train[~((train["GrLivArea"] > 4000) & (train["SalePrice"] < 300000))]
+print("Dataset shape after outlier removal:", train.shape)
