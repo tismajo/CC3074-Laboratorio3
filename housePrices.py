@@ -98,4 +98,11 @@ pred_multi = model_multi.predict(X_test)
 print('R2:', r2_score(y_test, pred_multi))
 print('RMSE:', np.sqrt(mean_squared_error(y_test, pred_multi)))
 
+"""## 8. Análisis de Residuos"""
 
+residuals = y_test - pred_multi
+
+sns.scatterplot(x=pred_multi, y=residuals)
+plt.axhline(0)
+plt.title('Análisis de residuos')
+plt.show()
