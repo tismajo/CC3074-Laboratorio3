@@ -152,3 +152,130 @@ Estas observaciones pueden afectar negativamente modelos lineales, por lo que se
 
 train = train[~((train["GrLivArea"] > 4000) & (train["SalePrice"] < 300000))]
 print("Dataset shape after outlier removal:", train.shape)
+
+"""## Ingeniería de características
+
+Basado en el análisis de correlación, se seleccionaron variables con alta relación con el precio:
+
+- OverallQual
+- GrLivArea
+- GarageCars
+- TotalBsmtSF
+- YearBuilt
+
+Estas variables representan calidad de construcción, tamaño de la vivienda y características estructurales importantes.
+"""
+
+features = [
+    "OverallQual",
+    "GrLivArea",
+    "GarageCars",
+    "TotalBsmtSF",
+    "YearBuilt"
+]
+
+X = train[features]
+y = train["SalePrice"]
+
+"""## División de datos en entrenamiento y prueba"""
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42
+)
+
+print("Train size:", X_train.shape)
+print("Test size:", X_test.shape)
+
+"""## Modelo de regresión lineal simple
+
+Se selecciona la variable **GrLivArea**, ya que mostró una relación lineal fuerte con el precio.
+"""
+
+from sklearn.linear_model import LinearRegression
+
+X_train_uni = X_train[["GrLivArea"]]
+X_test_uni = X_test[["GrLivArea"]]
+
+model_uni = LinearRegression()
+model_uni.fit(X_train_uni, y_train)
+
+pred_uni = model_uni.predict(X_test_uni)
+
+plt.scatter(X_test_uni, y_test)
+plt.plot(X_test_uni, pred_uni)
+plt.title("Linear Regression: GrLivArea vs SalePrice")
+plt.show()
+
+from sklearn.metrics import r2_score, mean_squared_error
+import numpy as np
+
+print("Simple Regression")
+print("R2:", r2_score(y_test, pred_uni))
+print("RMSE:", np.sqrt(mean_squared_error(y_test, pred_uni)))
+
+"""## Modelo de regresión lineal múltiple"""
+
+model_multi = LinearRegression()
+
+model_multi.fit(X_train, y_train)
+
+pred_multi = model_multi.predict(X_test)
+
+print("Multiple Regression")
+print("R2:", r2_score(y_test, pred_multi))
+print("RMSE:", np.sqrt(mean_squared_error(y_test, pred_multi)))
+
+"""## Análisis de multicolinealidad"""
+
+corr = X.corr()
+
+plt.figure()
+sns.heatmap(corr, annot=True, cmap="coolwarm")
+plt.title("Feature Correlation")
+plt.show()
+
+"""## Análisis de residuos"""
+
+residuals = y_test - pred_multi
+
+plt.scatter(pred_multi, residuals)
+plt.axhline(0)
+plt.title("Residual Analysis")
+plt.xlabel("Predicted")
+plt.ylabel("Residuals")
+plt.show()
+
+"""## Conclusión
+
+El análisis exploratorio permitió identificar las variables más influyentes en el precio de las viviendas, especialmente la calidad de la construcción (`OverallQual`), el área habitable (`GrLivArea`) y el tamaño del garaje.
+
+Se construyeron dos modelos:
+
+- Regresión lineal simple
+- Regresión lineal múltiple
+
+El modelo de regresión múltiple mostró mejor desempeño predictivo, ya que combina múltiples variables que explican mejor la variabilidad del precio.
+
+Por lo tanto, el modelo múltiple se considera el más adecuado para predecir el precio de las viviendas en este dataset.
+
+## Transformación logarítmica de la variable objetivo
+
+Durante el análisis exploratorio se observó que `SalePrice` presenta **asimetría positiva**.  
+Una práctica común en regresión es aplicar una transformación logarítmica para:
+
+- Reducir el efecto de outliers
+- Mejorar la normalidad de los residuos
+- Estabilizar la varianza
+"""
+
+train["LogSalePrice"] = np.log1p(train["SalePrice"])
+
+plt.figure()
+sns.histplot(train["LogSalePrice"], kde=True)
+plt.title("Distribución Log(SalePrice)")
+plt.show()
