@@ -279,3 +279,100 @@ plt.figure()
 sns.histplot(train["LogSalePrice"], kde=True)
 plt.title("Distribución Log(SalePrice)")
 plt.show()
+
+"""## Modelo de regresión utilizando Log(SalePrice)"""
+
+train.loc[:, "LogSalePrice"] = np.log1p(train["SalePrice"])
+y_log = train["LogSalePrice"]
+
+X_train_log, X_test_log, y_train_log, y_test_log = train_test_split(
+    X, y_log, test_size=0.2, random_state=42
+)
+
+model_log = LinearRegression()
+model_log.fit(X_train_log, y_train_log)
+
+pred_log = model_log.predict(X_test_log)
+
+print("Log Regression Model")
+print("R2:", r2_score(y_test_log, pred_log))
+print("RMSE:", np.sqrt(mean_squared_error(y_test_log, pred_log)))
+
+"""## Multicolinealidad usando VIF (Variance Inflation Factor)"""
+
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+vif_data = pd.DataFrame()
+vif_data["Feature"] = X.columns
+vif_data["VIF"] = [variance_inflation_factor(X.values, i) for i in range(len(X.columns))]
+
+print(vif_data)
+
+"""Interpretación del VIF:
+
+- **VIF = 1** → sin correlación
+- **VIF entre 1 y 5** → correlación moderada
+- **VIF > 5** → posible multicolinealidad
+
+## Diagnóstico de residuos
+"""
+
+residuals = y_test - pred_multi
+
+plt.figure()
+sns.histplot(residuals, kde=True)
+plt.title("Distribución de residuos")
+plt.show()
+
+plt.figure()
+sns.scatterplot(x=pred_multi, y=residuals)
+plt.axhline(0)
+plt.title("Residuos vs Predicciones")
+plt.show()
+
+"""## Evaluación de overfitting"""
+
+train_pred = model_multi.predict(X_train)
+
+train_r2 = r2_score(y_train, train_pred)
+test_r2 = r2_score(y_test, pred_multi)
+
+print("Train R2:", train_r2)
+print("Test R2:", test_r2)
+
+"""Si el **R² de entrenamiento es mucho mayor que el de prueba**, el modelo puede estar sobreajustado (overfitting).
+
+## Discusión final
+
+El análisis exploratorio permitió identificar los factores más relevantes en el precio de las viviendas. Variables relacionadas con **calidad de construcción, tamaño habitable y características estructurales** muestran la mayor influencia.
+
+Se evaluaron tres modelos:
+
+1. Regresión lineal simple
+2. Regresión lineal múltiple
+3. Regresión con transformación logarítmica
+
+El modelo múltiple y el modelo log-transformado tienden a mostrar mejor desempeño que la regresión simple, ya que incorporan más información sobre la vivienda.
+
+Además, el análisis de multicolinealidad mediante VIF permitió verificar que las variables seleccionadas no presentan dependencia excesiva entre sí.
+
+Finalmente, el modelo múltiple se considera el más apropiado para la predicción del precio de viviendas en este dataset.
+
+El análisis realizado sobre el Ames Housing Dataset permitió identificar los factores más importantes que influyen en el precio de venta de una vivienda. A través del análisis exploratorio se observó que la variable objetivo SalePrice presenta una distribución con fuerte asimetría positiva, lo que indica que existen pocas viviendas con precios extremadamente altos. Este comportamiento es común en datasets inmobiliarios, donde las propiedades de lujo generan valores atípicos que pueden afectar modelos estadísticos tradicionales.
+
+El análisis de correlación permitió identificar las variables con mayor relación con el precio de la vivienda. Entre las más relevantes se encuentran OverallQual, GrLivArea, GarageCars, GarageArea y TotalBsmtSF. Estas variables representan principalmente la calidad de la construcción, el tamaño de la propiedad y la disponibilidad de espacios adicionales, factores que tradicionalmente influyen en el valor de una vivienda dentro del mercado inmobiliario.
+
+En particular, la variable OverallQual mostró la correlación más alta con el precio de venta, lo que sugiere que la calidad de los materiales y acabados tiene un impacto significativo en la valoración de la propiedad. De forma similar, GrLivArea mostró una relación lineal positiva clara, indicando que las viviendas con mayor área habitable tienden a presentar precios más altos. Estas observaciones coinciden con principios económicos básicos del mercado inmobiliario, donde el tamaño y la calidad de la construcción son determinantes clave del valor de una propiedad.
+
+Durante el análisis también se identificaron outliers, principalmente viviendas con áreas habitables extremadamente grandes pero con precios relativamente bajos. Estas observaciones pueden distorsionar los modelos de regresión lineal, por lo que se aplicó una estrategia de eliminación de estos casos para mejorar la estabilidad del modelo.
+
+Posteriormente se construyeron diferentes modelos de regresión con el objetivo de predecir el precio de las viviendas. En primer lugar se desarrolló un modelo de regresión lineal simple utilizando la variable GrLivArea como predictor. Este modelo permitió observar la relación directa entre el tamaño de la vivienda y su precio, aunque su capacidad predictiva es limitada al considerar únicamente una variable.
+
+Para mejorar la predicción se construyó un modelo de regresión lineal múltiple, incorporando varias de las variables con mayor correlación con SalePrice. Este modelo mostró un mejor desempeño, ya que logra capturar múltiples factores estructurales de la vivienda que influyen simultáneamente en su precio. El análisis de residuos mostró que el modelo logra ajustarse razonablemente bien a los datos, aunque aún existe cierta variabilidad inherente al mercado inmobiliario.
+
+Adicionalmente se evaluó la presencia de multicolinealidad entre las variables predictoras mediante análisis de correlación y el cálculo del factor de inflación de la varianza (VIF). Los resultados indicaron que las variables seleccionadas presentan niveles aceptables de correlación, por lo que pueden utilizarse conjuntamente dentro del modelo sin generar problemas significativos de redundancia en la información.
+
+Finalmente, se evaluó el desempeño de los modelos utilizando el conjunto de prueba, empleando métricas como R² y RMSE para medir la calidad de la predicción. Los resultados muestran que el modelo de regresión múltiple presenta un mejor desempeño que el modelo univariado, ya que logra explicar una mayor proporción de la variabilidad en los precios de las viviendas.
+
+En conclusión, el análisis realizado demuestra que el precio de una vivienda depende de múltiples factores relacionados principalmente con la calidad de la construcción, el tamaño de la propiedad y sus características estructurales. Entre los modelos evaluados, la regresión lineal múltiple se presenta como el enfoque más adecuado para predecir el precio de las viviendas en este conjunto de datos, ya que permite integrar diversas variables relevantes y obtener estimaciones más precisas.
+"""
